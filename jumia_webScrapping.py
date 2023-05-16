@@ -6,9 +6,7 @@ baseurl = 'https://www.jumia.co.ke/'
 
 productlinks = []
 
-
-for x in range (1,6):
-
+for x in range(1, 6):
     result = requests.get(f'https://www.jumia.co.ke/mlp-free-delivery/?page={x}#catalog-listing') 
     soup = BeautifulSoup(result.content, 'html.parser')
 
@@ -18,26 +16,21 @@ for x in range (1,6):
         for link in item.find_all('a', href=True):
             productlinks.append(baseurl + link['href'])
 
-# print(len(productlinks))
-
-# testlink = 'https://www.jumia.co.ke/new-sports-casual-fashion-sports-mens-shoes-white-fashion-mpg248626.html'
+# Create an empty list to store all products scraped
+products = []
 
 for link in productlinks:
     result = requests.get(link)
-
     soup = BeautifulSoup(result.content, 'html.parser')
 
-
     name = soup.find('h1', class_='-fs20 -pts -pbxs').text.strip()
-    
     price = soup.find('span', class_='-b -ltr -tal -fs24').text.strip()
+    
     try:
         rating = soup.find('div', class_='stars _s _al').text.strip()
     except: 
         rating = 'no rating'
    
-    # discount = soup.find('span', class_='bdg _dsct _dyn -mls').text.strip()
-
     try:
         no_of_ratings = soup.find('a', class_='-plxs _more').text.strip()
     except:
@@ -48,7 +41,7 @@ for link in productlinks:
     except:
         no_of_reviews = 'unavailable'
 
-# Create a dictionary to store the information
+    # Create a dictionary to store the information for each product
     product = {
         'name' : name,
         'rating' : rating,
@@ -56,18 +49,16 @@ for link in productlinks:
         'no_of_ratings' : no_of_ratings,
         'no_of_reviews' : no_of_reviews
     }
-# print(name, rating, price, no_of_ratings, no_of_reviews)
 
+    # Append each product dictionary to the products list
+    products.append(product)
 
-print(product)
-
-
-# Create a list of dictionary to store the product information
-products = [product]
+    # Print the information for each product
+    print(product)
 
 # Open the CSV file in write mode
 with open('products.csv', mode='w', newline='') as file:
-    writer = csv.DictWriter(file, fieldnames=product.keys())
+    writer = csv.DictWriter(file, fieldnames=products[0].keys())
     writer.writeheader()
     for product in products:
         writer.writerow(product)
